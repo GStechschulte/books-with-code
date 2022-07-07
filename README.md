@@ -11,4 +11,4 @@ A repo containing code for problems, examples, and figures in books If possible,
 - Recreation of figures and completing exercises in Pyro. 
 
 [shape](/shape): Shape: The Hidden Geometry of Information, Biology, Strategy, Democracy, and Everything Else
-- ([buy here](https://www.amazon.com/dp/B08PF965W9/ref=dp-kindle-redirect?_encoding=UTF8&btkr=1))
+- [buy here](https://www.amazon.com/dp/B08PF965W9/ref=dp-kindle-redirect?_encoding=UTF8&btkr=1)
