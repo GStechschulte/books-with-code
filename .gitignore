@@ -128,8 +128,9 @@ dmypy.json
 # Pyre type checker
 
 # directories
-bmcp/utils
 bmcp/pymc
+bmcp/data
+
 
 .DS_Store
 __pycache__/
