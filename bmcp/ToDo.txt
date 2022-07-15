@@ -1,0 +1,7 @@
+Utilities:
+
+[ ] - functions for summary statistics (other than pyro.infer.mcmc.utils)
+[ ] - arviz from pyro (az.from_pyro) functionality
+
+Other:
+[ ] - Add SVI for models
