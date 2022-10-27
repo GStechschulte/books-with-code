@@ -1,15 +1,11 @@
-import enum
-from matplotlib import axes
 import pandas as pd
 import polars as pl
-import seaborn as sns
 import matplotlib.pyplot as plt
+import seaborn as sns
 import argparse
-import logging
 import pyro
 import torch
 import arviz as az
-#import torch.distributions as dist
 import pyro.distributions as dist
 from pyro.infer import Predictive, NUTS, MCMC
 
@@ -53,25 +49,13 @@ def gumbel(obs=None):
         )
 
 
-def predictive_check(model_1, model_2, obs):
-
-    model_1_pred = Predictive(model_1, {}, num_samples=100)(None)['obs']
-    model_2_pred = Predictive(model_2, {}, num_samples=100)(None)['obs']
-
-    sns.histplot(model_1_pred.flatten(), kde=True)
-    plt.show()
-
-    # for i, (pred_1, pred_2) in enumerate(zip(model_1_pred, model_2_pred)):
-    # sns.histplot(model_1_pred.flatten(), kde=True)
-    # plt.show()
-
-
 def main():
 
     msn_arrivals = load_data()
 
     ## Prior Predictive Check ##
-    #predictive_check(normal, gumbel, msn_arrivals)
+    normal_prior = Predictive(normal, {}, num_samples=100)(None)
+    gumbel_prior = Predictive(gumbel, {}, num_samples=100)(None)
 
     ## Inference ##
     normal_mcmc = MCMC(
@@ -89,39 +73,41 @@ def main():
     normal_posterior_samples = normal_mcmc.get_samples(1000)
     gumbel_posterior_samples = gumbel_mcmc.get_samples(1000)
     
-    normal_predictive = Predictive(normal, normal_posterior_samples)(None)['obs']
-    gumbel_predictive = Predictive(gumbel, gumbel_posterior_samples)(None)['obs']
+    normal_posterior = Predictive(normal, normal_posterior_samples)(None)
+    gumbel_posterior = Predictive(gumbel, gumbel_posterior_samples)(None)
 
-    fig, ax = plt.subplots(nrows=1, ncols=2)
-    sns.kdeplot(msn_arrivals, ax=ax[0], color='black', label='Obs. data')
-    sns.kdeplot(normal_predictive, ax=ax[0], color='blue', label='Post. pred. mean')
-    plt.legend()
-    sns.kdeplot(msn_arrivals, ax=ax[1], color='black', label='Obs. data')
-    sns.kdeplot(gumbel_predictive, ax=ax[1], color='blue', label='Post. pred. mean')
-    plt.legend()
-    plt.suptitle('Posterior Predictive Check')
+    arviz_normal = az.from_pyro(
+        posterior=normal_mcmc,
+        prior=normal_prior,
+        posterior_predictive=normal_posterior
+    )
+
+    arviz_gumbel = az.from_pyro(
+        posterior=gumbel_mcmc,
+        prior=gumbel_prior,
+        posterior_predictive=gumbel_posterior
+    )
+
+    # Inference Diagnostics ##
+    az.plot_trace(arviz_normal, kind='rank_bars')
+    az.plot_posterior(arviz_normal)
+    #az.plot_ppc(arviz_normal, observed=True, num_pp_samples=20) # does not work
+    plt.tight_layout()
     plt.show()
-
-    # arviz_normal = az.from_pyro(
-    #     posterior=normal_mcmc,
-    #     posterior_predictive=normal_predictive
-    # )
-
-    # arviz_gumbel = az.from_pyro(
-    #     posterior=gumbel_mcmc,
-    #     posterior_predictive=gumbel_predictive
-    # )
-
-    ## Inference Diagnostics ##
-    # az.plot_trace(arviz_normal)
-    # az.plot_rank(arviz_normal)
-    # az.plot_posterior(arviz_normal)
-    # az.plot_ppc(arviz_normal, observed=True, num_pp_samples=20)
-    # plt.show()
 
     ## Model Selection ##
     # compare_dict = {'normal': arviz_normal, 'gumbel': arviz_gumbel}
     # print(az.compare(compare_dict, ic='loo'))
+
+    fig, ax = plt.subplots(nrows=1, ncols=2)
+    sns.kdeplot(msn_arrivals, ax=ax[0], color='black', label='Obs. data')
+    sns.kdeplot(normal_posterior['obs'], ax=ax[0], color='blue', label='Post. pred. mean')
+    plt.legend()
+    sns.kdeplot(msn_arrivals, ax=ax[1], color='black', label='Obs. data')
+    sns.kdeplot(gumbel_posterior['obs'], ax=ax[1], color='blue', label='Post. pred. mean')
+    plt.legend()
+    plt.suptitle('Posterior Predictive Check')
+    plt.show()
 
 
 if __name__ == "__main__":
