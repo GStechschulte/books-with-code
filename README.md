@@ -1,6 +1,5 @@
 # books-with-code
-A repo containing code for problems, examples, and figures in books I have read. If possible, please support the authors by purchasing the book.
-
+A repo containing code for problems, examples, and figures in books I have read.
 ## Directories
 
 [Bayesian Modeling and Computation in Python](/bmcp/)
