@@ -130,6 +130,7 @@ dmypy.json
 # directories
 bmcp/pymc
 bmcp/data
+statistical_rethinking/data
 
 
 .DS_Store
