@@ -1,7 +1,43 @@
-import gpytorch
 import matplotlib.pyplot as plt
 import torch
 
+
+def visualize_progress_and_policy(data, policy, next_x=None, extent=[0, 2, 0, 2]):
+
+    with torch.no_grad():
+        acquisition_score = policy(data.xs.unsqueeze(1)).reshape(101, 101).T
+
+    
+    fig, ax = plt.subplots(nrows=1, ncols=2, figsize=(8, 3))
+
+    c = ax[0].imshow(data.ys.reshape(101, 101).T, origin="lower", extent=extent)
+    ax[0].set_xlabel(r"$C$")
+    ax[0].set_ylabel(r"$\gamma$")
+    plt.colorbar(c, ax=ax[0])
+
+    ax[0].scatter(
+        data.train_x[..., 0], 
+        data.train_x[..., 1], 
+        marker="x", 
+        c="k"
+    )
+
+    c = ax[1].imshow(acquisition_score, origin="lower", extent=extent)
+    ax[1].set_xlabel(r"$C$")
+    ax[1].set_ylabel(r"$\gamma$")
+    plt.colorbar(c, ax=ax[1])
+
+    if next_x is not None:
+        ax[1].scatter(
+            next_x[..., 0],
+            next_x[..., 1],
+            c="r",
+            marker="*",
+            s=250,
+            label="next query"
+        )
+    
+    plt.tight_layout()
 
 def visualize_gp_belief_and_policy(model, likelihood, data, policy=None, next_x=None):
 
