@@ -98,3 +98,23 @@ def visualize_gp_belief_and_policy(model, likelihood, data, policy=None, next_x=
                 ax[1].set_ylabel("acquisition score")
             
             plt.show()
+
+
+def visualize_experiment(result, n_queries, n_experiments, label=None):
+
+    def ci(y):
+        return 2 * y.std(axis=0) / torch.sqrt(torch.tensor(n_experiments))
+
+    mean_incumbent = result.mean(axis=0)[:, 0]
+    ci_incumbent = ci(result)[:, 0]
+
+    fig, ax = plt.subplots(1, 1, figsize=(7, 3))
+    ax.plot(torch.arange(n_queries), mean_incumbent, label="Mean")
+    ax.fill_between(
+        torch.arange(n_queries),
+        mean_incumbent - ci_incumbent,
+        mean_incumbent + ci_incumbent,
+        alpha=0.2,
+        label="CI",
+    )
+    return fig, ax
