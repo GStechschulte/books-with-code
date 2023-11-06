@@ -117,4 +117,6 @@ def visualize_experiment(result, n_queries, n_experiments, label=None):
         alpha=0.2,
         label="CI",
     )
+    ax.grid(True)
+
     return fig, ax
