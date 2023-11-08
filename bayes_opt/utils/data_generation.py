@@ -1,4 +1,4 @@
-from typing import NamedTuple
+from typing import NamedTuple, Union
 
 import gpytorch
 import torch
@@ -25,5 +25,5 @@ def forrester_fn(x):
 class GPData(NamedTuple):
     train_x: torch.Tensor
     train_y: torch.Tensor
-    xs: torch.Tensor
-    ys: torch.Tensor
+    xs: Union[torch.Tensor, None] = None
+    ys: Union[torch.Tensor, None] = None
