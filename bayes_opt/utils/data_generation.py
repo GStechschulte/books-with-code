@@ -3,6 +3,14 @@ from typing import NamedTuple, Union
 import gpytorch
 import torch
 
+
+class GPData(NamedTuple):
+    train_x: torch.Tensor
+    train_y: torch.Tensor
+    xs: Union[torch.Tensor, None] = None
+    ys: Union[torch.Tensor, None] = None
+
+
 def accuracy_fn(x):
     """
     Simulates the accuracy surface of a support-vector machine (SVM) in 
@@ -22,8 +30,9 @@ def forrester_fn(x):
     return y.squeeze(-1)
 
 
-class GPData(NamedTuple):
-    train_x: torch.Tensor
-    train_y: torch.Tensor
-    xs: Union[torch.Tensor, None] = None
-    ys: Union[torch.Tensor, None] = None
+def flight_objective_fn(x):
+    X_copy = x.detach().clone()
+    X_copy[:, [2, 3]] = 1 - X_copy[:, [2, 3]]
+    X_copy = X_copy * 10 - 5
+
+    return -0.005 * (X_copy ** 4 - 16 * X_copy ** 2 + 5 * X_copy).sum(dim=-1) + 3
